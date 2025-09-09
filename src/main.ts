@@ -86,8 +86,8 @@ function main() {
     if(controls.tesselations != prevTesselations)
     {
       prevTesselations = controls.tesselations;
-      //icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
-      //icosphere.create();
+      icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
+      icosphere.create();
     }
     renderer.render(camera, lambert, [
       //icosphere,
