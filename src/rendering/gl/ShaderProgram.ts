@@ -1,4 +1,4 @@
-import {vec4, mat4} from 'gl-matrix';
+import {vec4, mat4, vec2} from 'gl-matrix';
 import Drawable from './Drawable';
 import {gl} from '../../globals';
 
@@ -29,6 +29,12 @@ class ShaderProgram {
   unifModelInvTr: WebGLUniformLocation;
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
+  unifResolution: WebGLUniformLocation;
+  unifView :  WebGLUniformLocation;
+  unifViewInv :  WebGLUniformLocation;
+  unifEye :  WebGLUniformLocation;
+  unifCameraTarget :  WebGLUniformLocation;
+  unifTime :  WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -48,12 +54,28 @@ class ShaderProgram {
     this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
+    this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
+    this.unifView = gl.getUniformLocation(this.prog, "u_View");
+    this.unifViewInv = gl.getUniformLocation(this.prog, "u_ViewInv");
+    this.unifEye = gl.getUniformLocation(this.prog, "u_Eye");
+    this.unifCameraTarget = gl.getUniformLocation(this.prog, "u_CameraTarget");
+    this.unifTime = gl.getUniformLocation(this.prog, "u_Time");
   }
 
   use() {
     if (activeProgram !== this.prog) {
       gl.useProgram(this.prog);
       activeProgram = this.prog;
+    }
+  }
+
+  setEyeCameraTarget(eye:vec4, target:vec4){
+    this.use();
+    if(this.unifEye!==-1){
+      gl.uniform4fv(this.unifEye, eye);
+    }
+    if(this.unifCameraTarget!==-1){
+      gl.uniform4fv(this.unifCameraTarget, target);
     }
   }
 
@@ -71,10 +93,16 @@ class ShaderProgram {
     }
   }
 
-  setViewProjMatrix(vp: mat4) {
+  setViewProjMatrix(v:mat4, vp: mat4) {
     this.use();
     if (this.unifViewProj !== -1) {
       gl.uniformMatrix4fv(this.unifViewProj, false, vp);
+    }
+    if(this.unifView!==-1){
+      gl.uniformMatrix4fv(this.unifView, false, v);
+      let vinv : mat4 = mat4.create();
+      mat4.invert(vinv, v);
+      gl.uniformMatrix4fv(this.unifViewInv, false, vinv);
     }
   }
 
@@ -82,6 +110,20 @@ class ShaderProgram {
     this.use();
     if (this.unifColor !== -1) {
       gl.uniform4fv(this.unifColor, color);
+    }
+  }
+
+  setResolution(res: vec2) {
+    this.use();
+    if (this.unifResolution !== -1) {
+      gl.uniform2iv(this.unifResolution, res);
+    }
+  }
+
+  setTime(t:number){
+    this.use();
+    if(this.unifTime!==-1){
+      gl.uniform1ui(this.unifTime, t);
     }
   }
 
